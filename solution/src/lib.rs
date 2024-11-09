@@ -2,15 +2,20 @@ use std::io::{BufRead, Write};
 use std::{fs::File, io::stdin};
 
 pub fn turn(file_name: &str, p: &mut i32, width: &mut usize, height: &mut usize) {
-    let input = stdin().lock().lines();
+    let mut f = File::options().append(true).open(file_name).unwrap();
+    let input = stdin().lock().lines(); // Lecture des entrées
     let mut map_lines: Vec<String> = vec![];
     let mut piece_lines: Vec<String> = vec![];
     let mut map_recording = false;
     let mut piece_recording = false;
     
+    // Boucle de traitement des lignes
     for line in input {
-        let mut f = File::options().append(true).open(file_name).unwrap();
-        let txt = line.unwrap();
+        // --------------------------------------------
+        let txt = line.unwrap(); // Il suffit que je fasse un unwrap() ou un ok() sur la ligne pour que le programme se fige.
+        // Tu peux exécuter pour voir
+        
+        /*
         let msg = "PARSING ERROR";
         let (mut piece_w, mut piece_h) = (0, 0);
 
@@ -40,10 +45,10 @@ pub fn turn(file_name: &str, p: &mut i32, width: &mut usize, height: &mut usize)
             piece_lines.push(txt.clone());
         }
 
-        writeln!(&mut f, "{}", txt).unwrap();
-        println!("3 3");
+        writeln!(&mut f, "{}", txt).unwrap(); */
     }
 
+    /*
     piece_recording = false;
 
     if map_lines.len() > 0 {
@@ -63,4 +68,8 @@ pub fn turn(file_name: &str, p: &mut i32, width: &mut usize, height: &mut usize)
         }
         writeln!(&mut f, "=============================================================").unwrap();
     }
+     */
+
+    // Affichage de ma réponse. J'ai simulé 3 3 pour passer le tour
+    println!("3 3");
 }
