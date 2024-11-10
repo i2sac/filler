@@ -1,12 +1,13 @@
 use std::fs::File;
-use ultron::turn;
+use ultron::*;
 
 fn main() {
     let file_name = "output.txt";
+    let mut game = Game::new(&file_name);
     let _ = File::create(file_name).unwrap();
-    let mut p = 1;
-    let (mut width, mut height) = (0usize, 0usize);
+    
     loop {
-        turn(&file_name, &mut p, &mut width, &mut height);
+        turn(&mut game);
+        game.turn_number += 1;
     }
 }

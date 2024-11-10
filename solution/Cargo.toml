@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 rand = "0.8.5"
 regex = "1.11.1"
+rust_linalg = { git = "https://github.com/louisisaacdiouf/rust_linalg", version = "0.1.0" }
