@@ -1,12 +1,11 @@
 use std::cmp;
-use std::io::{BufRead, Write};
-use std::{fs::File, io::stdin};
+use std::io::BufRead;
+use std::io::stdin;
 
 use rust_linalg::Matrix;
 
 #[derive(Debug, Clone)]
 pub struct Game {
-    pub output_file: String,
     pub my_player: usize,
     pub map_width: usize,
     pub map_height: usize,
@@ -14,9 +13,8 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(file_name: &str) -> Self {
+    pub fn new() -> Self {
         Game {
-            output_file: file_name.to_string(),
             my_player: 1,
             map_width: 0,
             map_height: 0,
@@ -26,10 +24,6 @@ impl Game {
 }
 
 pub fn turn(game: &mut Game) {
-    let mut f = File::options()
-        .append(true)
-        .open(&game.output_file)
-        .unwrap();
     let input = stdin().lock().lines(); // Lecture des entrées
     let msg = "PARSING ERROR";
     let mut map_lines: Vec<String> = vec![];
@@ -71,8 +65,6 @@ pub fn turn(game: &mut Game) {
         if map_recording && !txt.starts_with("Anfield ") && !txt.starts_with("   ") {
             map_lines.push(txt.clone().split_at(4).1.to_string());
         }
-
-        writeln!(&mut f, "{}", txt).unwrap();
 
         if piece_recording == 0 {
             break;
@@ -144,7 +136,6 @@ pub fn turn(game: &mut Game) {
                             .collect(),
                     );
                     _mat = piece_matrix + map_window;
-                    writeln!(&mut f, "Conv res: {:?}", _mat.data.iter().flatten().collect::<Vec<&usize>>()).unwrap();
                     let good_overlay = _mat.data.iter().flatten().filter(|v| **v == 2).count();
                     let bad_overlay = _mat.data.iter().flatten().filter(|v| **v > 2).count();
                     if good_overlay == 1 && bad_overlay == 0 {
@@ -153,36 +144,6 @@ pub fn turn(game: &mut Game) {
                 }
             }
         }
-
-        // let mut f = File::options()
-        //     .append(true)
-        //     .open(&game.output_file)
-        //     .unwrap();
-        // writeln!(&mut f, "=================================================").unwrap();
-        // writeln!(&mut f, "Map:").unwrap();
-        // for line in map_vecs {
-        //     writeln!(&mut f, "{:?}", line).unwrap();
-        // }
-        // writeln!(&mut f, "=================================================").unwrap();
-
-        // if piece_lines.len() > 0 {
-        //     let mut f = File::options()
-        //         .append(true)
-        //         .open(&game.output_file)
-        //         .unwrap();
-        //     writeln!(&mut f, "=================================================").unwrap();
-        //     writeln!(&mut f, "Piece {} {}:", piece_w, piece_h).unwrap();
-        //     for line in piece_vecs {
-        //         writeln!(&mut f, "{:?}", line).unwrap();
-        //     }
-        //     writeln!(&mut f, "=================================================").unwrap();
-        //     writeln!(&mut f, "=================================================").unwrap();
-        //     writeln!(&mut f, "Pos OK:").unwrap();
-        //     for pos in pos_ok.iter() {
-        //         writeln!(&mut f, "{:?}", pos).unwrap();
-        //     }
-        //     writeln!(&mut f, "=================================================").unwrap();
-        // }
 
         if pos_ok.len() > 0 {
             let mut min_dist = 2 * cmp::min(game.map_width, game.map_height);
@@ -201,6 +162,5 @@ pub fn turn(game: &mut Game) {
         }
     }
 
-    // Affichage de ma réponse. J'ai simulé 3 3 pour passer le tour
     println!("0 0");
 }
