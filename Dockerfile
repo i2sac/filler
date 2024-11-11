@@ -1,4 +1,4 @@
-FROM rust:1.63-buster
+FROM rust:1.70-buster
 
 COPY ./maps			        /filler/maps
 COPY ./linux_robots		    /filler/linux_robots
