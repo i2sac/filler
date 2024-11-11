@@ -9,7 +9,6 @@ pub struct Game {
     pub my_player: usize,
     pub map_width: usize,
     pub map_height: usize,
-    pub turn_number: usize,
 }
 
 impl Game {
@@ -18,13 +17,13 @@ impl Game {
             my_player: 1,
             map_width: 0,
             map_height: 0,
-            turn_number: 0,
         }
     }
 }
 
+/// Handler of all actions that occur during a turn
 pub fn turn(game: &mut Game) {
-    let input = stdin().lock().lines(); // Lecture des entrées
+    let input = stdin().lock().lines(); // Input reading
     let msg = "PARSING ERROR";
     let mut map_lines: Vec<String> = vec![];
     let mut piece_lines: Vec<String> = vec![];
@@ -32,13 +31,13 @@ pub fn turn(game: &mut Game) {
     let mut piece_recording = -1;
     let (mut piece_w, mut piece_h) = (0, 0);
 
-    // Boucle de traitement des lignes
+    // Lines processing loop
     for line in input {
         let txt = line.unwrap();
 
-        if let Some(p_cmd) = txt.strip_prefix("$$$ exec p") {
+        if let Some(p_cmd) = txt.strip_prefix("$$$ exec p") { // Get player number
             game.my_player = p_cmd.split_at(1).0.parse::<usize>().expect(&msg);
-        } else if let Some(size_raw) = txt.strip_prefix("Anfield ") {
+        } else if let Some(size_raw) = txt.strip_prefix("Anfield ") { // Get map size
             let size = size_raw
                 .replace(":", "")
                 .split(" ")
@@ -46,7 +45,7 @@ pub fn turn(game: &mut Game) {
                 .collect::<Vec<usize>>();
             (game.map_width, game.map_height) = (size[0], size[1]);
             map_recording = true;
-        } else if let Some(piece_size) = txt.strip_prefix("Piece ") {
+        } else if let Some(piece_size) = txt.strip_prefix("Piece ") { // Get piece size
             let size = piece_size
                 .replace(":", "")
                 .split(" ")
@@ -57,6 +56,7 @@ pub fn turn(game: &mut Game) {
             piece_recording = piece_h as i32 + 1;
         }
 
+        // Loop limiter
         if piece_recording > 0 {
             piece_lines.push(txt.clone());
             piece_recording -= 1;
@@ -66,6 +66,7 @@ pub fn turn(game: &mut Game) {
             map_lines.push(txt.clone().split_at(4).1.to_string());
         }
 
+        // Break condition for reading loop
         if piece_recording == 0 {
             break;
         }
@@ -82,17 +83,9 @@ pub fn turn(game: &mut Game) {
             _ => (['$', 's'], ['@', 'a']),
         };
 
-        // let corner_pos = match game.turn_number {
-        //     0 => match game.my_player {
-        //         1 => (game.map_width - 1, game.map_height - 1),
-        //         _ => (0, 0),
-        //     },
-        //     1 => (game.map_width - 1, 0),
-        //     _ => (0, game.map_height - 1),
-        // };
-
         let mut foe_pos: Vec<(usize, usize)> = vec![];
 
+        // Get foe's positions
         for (y, line) in map_lines.iter().enumerate() {
             for (x, c) in line.chars().enumerate() {
                 if foe_chars.contains(&c) {
@@ -101,8 +94,10 @@ pub fn turn(game: &mut Game) {
             }
         }
 
+        // Convolution limits
         let (mut min_x, mut max_x, mut min_y, mut max_y) = (game.map_width, 0, game.map_height, 0);
 
+        // Transform the map into a matrix
         let map_vecs = map_lines
             .iter()
             .enumerate()
@@ -133,6 +128,7 @@ pub fn turn(game: &mut Game) {
             })
             .collect::<Vec<Vec<usize>>>();
 
+        // Transform given piece into a matrix
         let piece_vecs = piece_lines
             .iter()
             .map(|line| {
@@ -150,9 +146,11 @@ pub fn turn(game: &mut Game) {
         let mut pos_ok: Vec<(usize, usize)> = vec![];
         let mut _mat: Matrix<usize> = Matrix::new(vec![vec![]]);
 
+        // Limit convolution to players most extreme pieces
         min_x = cmp::max(0, min_x as i32 - piece_w as i32) as usize;
         min_y = cmp::max(0, min_y as i32 - piece_h as i32) as usize;
 
+        // Get possible moves
         for y in min_y..=max_y {
             for x in min_x..=max_x {
                 if x + piece_w <= game.map_width && y + piece_h <= game.map_height {
@@ -174,12 +172,6 @@ pub fn turn(game: &mut Game) {
         }
 
         if pos_ok.len() > 0 {
-            // Utiliser la stratégie appropriée en fonction du tour
-            // let output_pos = match game.turn_number {
-            //     0 => closer_to_enemy(&pos_ok, &foe_pos),
-            //     1 => closer_to_corner(&pos_ok, corner_pos),
-            //     _ => closer_to_center(&pos_ok, game.map_width, game.map_height),
-            // };
             let output_pos = closer_to_enemy(&pos_ok, &foe_pos);
 
             println!("{} {}", output_pos.0, output_pos.1);
@@ -189,6 +181,7 @@ pub fn turn(game: &mut Game) {
     }
 }
 
+/// Approching the enemy and try to block his progress
 fn closer_to_enemy(pos_ok: &[(usize, usize)], foe_pos: &[(usize, usize)]) -> (usize, usize) {
     let mut min_dist = usize::MAX;
     let mut output_pos = pos_ok[0];
@@ -206,41 +199,3 @@ fn closer_to_enemy(pos_ok: &[(usize, usize)], foe_pos: &[(usize, usize)]) -> (us
 
     output_pos
 }
-
-
-// fn closer_to_corner(pos_ok: &[(usize, usize)], corner_pos: (usize, usize)) -> (usize, usize) {
-//     let mut min_dist = usize::MAX;
-//     let mut output_pos = pos_ok[0];
-
-//     for &pos in pos_ok.iter() {
-//         let dist = ((pos.0 as i32 - corner_pos.0 as i32).abs()
-//             + (pos.1 as i32 - corner_pos.1 as i32).abs()) as usize;
-//         if dist < min_dist {
-//             min_dist = dist;
-//             output_pos = pos;
-//         }
-//     }
-
-//     output_pos
-// }
-
-// fn closer_to_center(
-//     pos_ok: &[(usize, usize)],
-//     map_width: usize,
-//     map_height: usize,
-// ) -> (usize, usize) {
-//     let center_pos = (map_width / 2, map_height / 2);
-//     let mut min_dist = usize::MAX;
-//     let mut output_pos = pos_ok[0];
-
-//     for &pos in pos_ok.iter() {
-//         let dist = ((pos.0 as i32 - center_pos.0 as i32).abs()
-//             + (pos.1 as i32 - center_pos.1 as i32).abs()) as usize;
-//         if dist < min_dist {
-//             min_dist = dist;
-//             output_pos = pos;
-//         }
-//     }
-
-//     output_pos
-// }
