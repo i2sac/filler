@@ -5,6 +5,10 @@ fn main() {
     
     loop {
         turn(&mut game);
-        game.turn_number += 1;
+        if game.turn_number < 2 {
+            game.turn_number += 1;            
+        } else {
+            game.turn_number = 0;
+        }
     }
 }
