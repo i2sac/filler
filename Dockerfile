@@ -5,6 +5,7 @@ COPY ./linux_robots		    /filler/linux_robots
 COPY ./m1_robots		    /filler/m1_robots
 COPY ./linux_game_engine	/filler/linux_game_engine
 COPY ./m1_game_engine	    /filler/m1_game_engine
+COPY ./solution	            /filler/solution
 
 WORKDIR /filler/
 

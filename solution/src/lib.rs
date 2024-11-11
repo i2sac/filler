@@ -181,21 +181,18 @@ pub fn turn(game: &mut Game) {
     }
 }
 
-/// Approching the enemy and try to block his progress
+/// Approaching the enemy and trying to block their progress
 fn closer_to_enemy(pos_ok: &[(usize, usize)], foe_pos: &[(usize, usize)]) -> (usize, usize) {
-    let mut min_dist = usize::MAX;
-    let mut output_pos = pos_ok[0];
-
-    for &pos1 in pos_ok.iter() {
-        for &pos2 in foe_pos.iter() {
-            let dist = ((pos1.0 as i32 - pos2.0 as i32).abs()
-                + (pos1.1 as i32 - pos2.1 as i32).abs()) as usize;
-            if dist < min_dist {
-                min_dist = dist;
-                output_pos = pos1;
-            }
-        }
-    }
-
-    output_pos
+    pos_ok
+        .iter()
+        .min_by_key(|&&pos| {
+            foe_pos
+                .iter()
+                .map(|&foe| (pos.0 as i32 - foe.0 as i32).abs() + (pos.1 as i32 - foe.1 as i32).abs())
+                .min()
+                .unwrap_or(usize::MAX as i32)
+        })
+        .copied()
+        .unwrap_or(pos_ok[0])
 }
+
