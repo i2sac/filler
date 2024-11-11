@@ -33,5 +33,5 @@ Le projet implémente un algorithme de placement de pièces en utilisant des mat
 
 Le but du jeu est de remplir la grille avec le maximum de pièces tout en anticipant les mouvements de l’adversaire et en plaçant les pièces de manière stratégique.
 
-## Author
+## Auteur
 @lodiouf
